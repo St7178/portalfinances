@@ -65,11 +65,11 @@ export default async function DashboardPage() {
   const monthlyTrend = useMockData ? mockMonthlyTrend : computeMonthlyTrend(expenses, incomes);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <AlertBanner alerts={alerts} />
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary to-primary/70 p-6 text-primary-foreground shadow-lg shadow-primary/20 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-3">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary to-primary/70 p-5 text-primary-foreground shadow-lg shadow-primary/20 sm:p-6 lg:col-span-2">
           <div
             aria-hidden
             className="pointer-events-none absolute -right-16 -top-16 size-56 rounded-full bg-white/10 blur-2xl"
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <FinancialCard
           label="Gastado esta semana"
           value={formatCurrency(s.spentThisWeek)}

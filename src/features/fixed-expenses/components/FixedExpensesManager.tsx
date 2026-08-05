@@ -136,7 +136,7 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
                             href={item.paymentUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
+                            className="-m-2 shrink-0 p-2 text-muted-foreground transition-colors hover:text-primary"
                             aria-label={`Pagar ${item.name}`}
                           >
                             <ExternalLink className="size-3.5" />
@@ -150,7 +150,7 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
                         <button
                           type="button"
                           onClick={() => handleDelete(item.id)}
-                          className="shrink-0 text-muted-foreground hover:text-danger"
+                          className="-m-2 shrink-0 p-2 text-muted-foreground hover:text-danger"
                           aria-label={`Eliminar ${item.name}`}
                         >
                           <Trash2 className="size-3.5" />
