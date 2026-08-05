@@ -94,7 +94,33 @@ provider directly.
 
 ---
 
-## 5. Deploy — Vercel (free Hobby plan)
+## 5. Email reminders — Resend (free tier)
+
+Sends a "vence mañana" email for each active fixed expense due the next day.
+Runs once a day via Vercel Cron → `src/app/api/cron/reminders/route.ts`.
+
+1. [resend.com](https://resend.com) → API Keys → Create API key. 100
+   emails/day free, no card required.
+2. `RESEND_API_KEY=...` in `.env.local`. `RESEND_FROM_EMAIL` can stay as
+   `onboarding@resend.dev` — Resend's shared test domain works without
+   verifying your own, at lower deliverability. Verify a domain in Resend
+   later if you want mail from your own address.
+3. Generate a `CRON_SECRET` and add it too — this is what stops random
+   requests from triggering the endpoint:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+4. Add fixed expenses (rent, internet, subscriptions) from **Settings →
+   Gastos fijos** once logged in — the cron only emails about entries
+   created there, not the dashboard's demo data. Turn reminders off per
+   account from the same Settings page.
+
+Without `RESEND_API_KEY`, the cron route runs and no-ops (`skipped: true`)
+rather than failing — same demo-safe pattern as everything else here.
+
+---
+
+## 6. Deploy — Vercel (free Hobby plan)
 
 1. Push this repo to GitHub, then [import it on Vercel](https://vercel.com/new).
 2. Add every var from `.env.local` to the project's Environment Variables.
@@ -102,12 +128,12 @@ provider directly.
    URL.
 4. Deploy. Hobby plan covers this app fully — no Pro features needed.
 
-Hobby-plan cron jobs are limited to once/day; this app doesn't currently
-need scheduled jobs (recurring expenses are computed on read, not via cron).
+The reminders cron (`vercel.json`) runs once a day, which is exactly what
+Hobby-plan cron jobs allow — no Pro upgrade needed.
 
 ---
 
-## 6. Optional observability (all free tier)
+## 7. Optional observability (all free tier)
 
 | Service | Free tier | Var |
 |---|---|---|

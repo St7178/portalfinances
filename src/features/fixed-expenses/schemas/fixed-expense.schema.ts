@@ -9,4 +9,5 @@ export const fixedExpenseSchema = z.object({
   order: z.number().int().nonnegative().default(0),
 });
 
-export type FixedExpenseFormValues = z.infer<typeof fixedExpenseSchema>;
+export type FixedExpenseFormInput = z.input<typeof fixedExpenseSchema>;
+export type FixedExpenseFormValues = z.output<typeof fixedExpenseSchema>;

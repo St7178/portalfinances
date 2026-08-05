@@ -9,7 +9,10 @@ import { auth } from "@/lib/auth/config";
  */
 const DEMO_MODE = !process.env.AUTH_GOOGLE_ID;
 
-const PUBLIC_PATHS = ["/login", "/api/auth"];
+// /api/cron is server-to-server (Vercel Cron invoking this app, no user
+// session) — it does its own authorization by checking CRON_SECRET inside
+// the route handler instead.
+const PUBLIC_PATHS = ["/login", "/api/auth", "/api/cron"];
 
 export default auth((req) => {
   if (DEMO_MODE) return NextResponse.next();
