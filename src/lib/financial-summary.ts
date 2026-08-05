@@ -69,6 +69,20 @@ export function computeFinancialSummary(
     incomes.find((i) => i.type === "salary")?.amount ??
     0;
 
+  // "Dinero disponible" (the hero figure) is a running balance — all income
+  // you've ever logged minus all variable expenses you've ever logged minus
+  // your current fixed obligations for this period. Deliberately NOT scoped
+  // to "this month": a new user who logs a few expenses before their first
+  // income entry would otherwise see a spuriously negative hero number on
+  // day one, which reads as broken rather than as a real signal.
+  const totalIncomeAllTime = incomes.reduce((sum, i) => sum + i.amount, 0);
+  const totalVariableAllTime = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const availableBalance = totalIncomeAllTime - totalVariableAllTime - totalFixed;
+
+  // "Disponible para el mes" stays scoped to the current month on purpose —
+  // going negative there is a meaningful, intentional signal ("you're on
+  // track to spend more than you've earned this month"), unlike the hero
+  // figure above.
   const availableForMonth = totalIncomeThisMonth - spentThisMonth;
   const monthlyBudget = totalIncomeThisMonth > 0 ? totalIncomeThisMonth : DEFAULT_MONTHLY_BUDGET;
 
@@ -80,7 +94,7 @@ export function computeFinancialSummary(
   const totalSaved = savingsGoals.reduce((sum, g) => sum + g.currentAmount, 0);
 
   return {
-    availableBalance: availableForMonth,
+    availableBalance,
     monthlySalary: currentSalary,
     spentToday,
     spentThisWeek,

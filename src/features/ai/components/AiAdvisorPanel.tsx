@@ -5,9 +5,9 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getFinancialAdvice } from "@/features/ai/actions/financial-advice";
-import { mockExpenses, mockIncomes, mockSummary } from "@/lib/mock/data";
+import type { SpendingData } from "@/types";
 
-export function AiAdvisorPanel() {
+export function AiAdvisorPanel({ data }: { data: SpendingData }) {
   const [advice, setAdvice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -16,11 +16,7 @@ export function AiAdvisorPanel() {
     setError(null);
     startTransition(async () => {
       try {
-        const text = await getFinancialAdvice({
-          expenses: mockExpenses,
-          incomes: mockIncomes,
-          summary: mockSummary,
-        });
+        const text = await getFinancialAdvice(data);
         setAdvice(text);
       } catch {
         setError(

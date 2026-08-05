@@ -21,6 +21,8 @@ import { formatCurrency } from "@/lib/utils";
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday-first
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
+export const dynamic = "force-dynamic";
+
 export default async function AnalyticsPage() {
   const session = await auth();
   const userId = session?.user?.id;

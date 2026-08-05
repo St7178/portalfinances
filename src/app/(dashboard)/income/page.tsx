@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth/config";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import { mockIncomes } from "@/lib/mock/data";
 
+export const dynamic = "force-dynamic";
+
 export default async function IncomePage() {
   const session = await auth();
   const userId = session?.user?.id;

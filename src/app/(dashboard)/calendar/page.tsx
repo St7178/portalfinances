@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth/config";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import { mockExpenses, mockFixedExpenses, mockIncomes } from "@/lib/mock/data";
 
+export const dynamic = "force-dynamic";
+
 export default async function CalendarPage() {
   const session = await auth();
   const userId = session?.user?.id;

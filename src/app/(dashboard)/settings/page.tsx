@@ -5,6 +5,8 @@ import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { SettingsClientSections } from "@/features/settings/components/SettingsClientSections";
 import { auth } from "@/lib/auth/config";
 
+export const dynamic = "force-dynamic";
+
 export default async function SettingsPage() {
   const session = await auth();
   const userId = session?.user?.id;
