@@ -1,4 +1,4 @@
-import { startOfMonth, subDays } from "date-fns";
+import { subDays } from "date-fns";
 import type {
   AlertRule,
   CalendarEvent,
@@ -9,7 +9,24 @@ import type {
   SavingsGoal,
 } from "@/types";
 
-const today = new Date();
+// Fixed anchor rather than `new Date()`: this file is imported by both
+// Server and Client Components, and a live clock read at module scope
+// evaluates once during SSR and again during client hydration. Those two
+// reads can land on different calendar days when the server (UTC on
+// Vercel) and the visitor's browser (their local timezone) disagree,
+// producing a hydration mismatch on date-derived text. Mock data has no
+// reason to track the real clock, so it doesn't.
+//
+// The noon anchor matters as much as the fixed value: `startOfMonth()` and
+// the local-time `new Date(y, m, d)` constructor both land on local
+// midnight, which is one negative UTC offset away from rolling onto the
+// previous calendar day when a visitor's browser reformats it — that's a
+// second, independent way to reproduce the same hydration bug even with a
+// fixed anchor. `atNoonUTC` keeps every derived date a safe ~12h from that
+// boundary regardless of the visitor's timezone.
+const today = new Date("2026-08-04T12:00:00Z");
+const atNoonUTC = (year: number, monthIndex: number, day: number) =>
+  new Date(Date.UTC(year, monthIndex, day, 12));
 const iso = (d: Date) => d.toISOString();
 
 export const mockExpenses: Expense[] = [
@@ -193,7 +210,13 @@ export const mockFixedExpenses: FixedExpense[] = [
 ];
 
 export const mockIncomes: Income[] = [
-  { id: "i1", name: "Salario", amount: 2600, type: "salary", date: iso(startOfMonth(today)) },
+  {
+    id: "i1",
+    name: "Salario",
+    amount: 2600,
+    type: "salary",
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth(), 1)),
+  },
   {
     id: "i2",
     name: "Proyecto freelance",
@@ -209,7 +232,7 @@ export const mockSavingsGoals: SavingsGoal[] = [
     name: "Moto nueva",
     targetAmount: 4500,
     currentAmount: 2650,
-    targetDate: iso(new Date(today.getFullYear(), today.getMonth() + 4, 1)),
+    targetDate: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth() + 4, 1)),
     color: "var(--color-chart-1)",
     emoji: "🏍️",
     status: "active",
@@ -219,7 +242,7 @@ export const mockSavingsGoals: SavingsGoal[] = [
     name: "Viaje a Japón",
     targetAmount: 3200,
     currentAmount: 980,
-    targetDate: iso(new Date(today.getFullYear() + 1, 2, 1)),
+    targetDate: iso(atNoonUTC(today.getUTCFullYear() + 1, 2, 1)),
     color: "var(--color-chart-5)",
     emoji: "✈️",
     status: "active",
@@ -276,21 +299,21 @@ export const mockCalendarEvents: CalendarEvent[] = [
   },
   {
     id: "cal-f1",
-    date: iso(new Date(today.getFullYear(), today.getMonth(), 15)),
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth(), 15)),
     kind: "fixed" as const,
     label: "Moto + Transporte",
     amount: 240,
   },
   {
     id: "cal-f2",
-    date: iso(new Date(today.getFullYear(), today.getMonth(), 30)),
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth(), 30)),
     kind: "fixed" as const,
     label: "Internet + Celular",
     amount: 80,
   },
   {
     id: "cal-r1",
-    date: iso(new Date(today.getFullYear(), today.getMonth(), 28)),
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth(), 28)),
     kind: "reminder" as const,
     label: "Revisar presupuesto",
   },
@@ -319,12 +342,12 @@ export const mockSummary: FinancialSummary = {
   nextExpense: {
     name: "Internet",
     amount: 45,
-    date: iso(new Date(today.getFullYear(), today.getMonth(), 30)),
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth(), 30)),
   },
   nextIncome: {
     name: "Salario",
     amount: 2600,
-    date: iso(new Date(today.getFullYear(), today.getMonth() + 1, 1)),
+    date: iso(atNoonUTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 1)),
   },
 };
 
