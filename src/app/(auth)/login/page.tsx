@@ -1,5 +1,6 @@
 import { Sparkles, Wallet2 } from "lucide-react";
 import Link from "next/link";
+import { LoginBackdrop } from "@/components/auth/LoginBackdrop";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { signIn } from "@/lib/auth/config";
@@ -8,13 +9,10 @@ const DEMO_MODE = !process.env.AUTH_GOOGLE_ID;
 
 export default function LoginPage() {
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-4">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,color-mix(in_oklch,var(--color-primary)_18%,transparent),transparent_55%),radial-gradient(circle_at_80%_75%,color-mix(in_oklch,var(--color-success)_14%,transparent),transparent_50%)]"
-      />
+    <main className="dark relative flex min-h-dvh items-center justify-center overflow-hidden bg-background px-4 text-foreground">
+      <LoginBackdrop />
 
-      <div className="relative w-full max-w-sm space-y-8">
+      <div className="relative w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
             <Wallet2 className="size-5" />
@@ -27,7 +25,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="space-y-3 rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="space-y-3 rounded-2xl border border-border bg-card/70 p-6 shadow-xl shadow-black/20 backdrop-blur supports-backdrop-filter:bg-card/60">
           <form
             action={async () => {
               "use server";

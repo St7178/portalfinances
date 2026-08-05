@@ -1,12 +1,17 @@
+import { cache } from "react";
 import { db } from "@/lib/firebase/admin";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import type { FixedExpense } from "@/types";
 
 /**
  * Plain server-side read (not a Server Action — nothing here is triggered
- * from a client event). Used by the Settings page and the reminders cron.
+ * from a client event). Used by the Settings page and the dashboard layout.
+ * Wrapped in `cache()` so the layout (alerts) and a page that both need this
+ * within the same request share one Firestore read.
  */
-export async function listFixedExpenses(userId: string): Promise<FixedExpense[]> {
+export const listFixedExpenses = cache(async function listFixedExpenses(
+  userId: string,
+): Promise<FixedExpense[]> {
   if (DEMO_MODE) return [];
 
   const snapshot = await db
@@ -32,4 +37,4 @@ export async function listFixedExpenses(userId: string): Promise<FixedExpense[]>
       paidPeriods: data.paidPeriods ?? [],
     } satisfies FixedExpense;
   });
-}
+});

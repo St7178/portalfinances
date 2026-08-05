@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { mockAlerts } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
 import type { AlertRule } from "@/types";
 
@@ -21,9 +20,9 @@ const severityClass: Record<AlertRule["severity"], string> = {
   danger: "text-danger bg-danger/10",
 };
 
-export function AlertsPopover() {
+export function AlertsPopover({ alerts: allAlerts }: { alerts: AlertRule[] }) {
   const [dismissed, setDismissed] = useState<string[]>([]);
-  const alerts = mockAlerts.filter((a) => !dismissed.includes(a.id));
+  const alerts = allAlerts.filter((a) => !dismissed.includes(a.id));
 
   return (
     <Popover>

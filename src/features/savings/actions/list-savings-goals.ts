@@ -1,9 +1,16 @@
+import { cache } from "react";
 import { db } from "@/lib/firebase/admin";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import type { SavingsGoal } from "@/types";
 
-/** Plain server-side read (not a Server Action) — used by pages and the dashboard. */
-export async function listSavingsGoals(userId: string): Promise<SavingsGoal[]> {
+/**
+ * Plain server-side read (not a Server Action) — used by pages and the
+ * dashboard layout. Wrapped in `cache()` so the layout (alerts) and a page
+ * that both need this within the same request share one Firestore read.
+ */
+export const listSavingsGoals = cache(async function listSavingsGoals(
+  userId: string,
+): Promise<SavingsGoal[]> {
   if (DEMO_MODE) return [];
 
   const snapshot = await db
@@ -28,4 +35,4 @@ export async function listSavingsGoals(userId: string): Promise<SavingsGoal[]> {
       status: data.status,
     } satisfies SavingsGoal;
   });
-}
+});

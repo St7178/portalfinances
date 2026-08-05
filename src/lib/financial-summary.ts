@@ -1,9 +1,6 @@
 import { isSameDay, isSameMonth, isSameWeek } from "date-fns";
 import type { Expense, FinancialSummary, FixedExpense, Income, SavingsGoal } from "@/types";
 
-/** No explicit budget-setting feature yet — used only when there's no income recorded this month to derive one from. */
-const DEFAULT_MONTHLY_BUDGET = 3_000_000;
-
 const atNoonUTC = (year: number, monthIndex: number, day: number) =>
   new Date(Date.UTC(year, monthIndex, day, 12));
 
@@ -84,12 +81,20 @@ export function computeFinancialSummary(
   // track to spend more than you've earned this month"), unlike the hero
   // figure above.
   const availableForMonth = totalIncomeThisMonth - spentThisMonth;
-  const monthlyBudget = totalIncomeThisMonth > 0 ? totalIncomeThisMonth : DEFAULT_MONTHLY_BUDGET;
+  // No explicit budget-setting feature yet, and no invented default either —
+  // this app previously showed a hardcoded 3,000,000 COP "budget" the user
+  // never set, which read as fabricated data. Zero here means "not enough
+  // information yet" and every consumer (alerts, predictions, this card)
+  // already guards on `monthlyBudget > 0` before using it.
+  const monthlyBudget = totalIncomeThisMonth;
 
-  const healthScore = Math.min(
-    100,
-    Math.max(0, Math.round(50 + ((monthlyBudget - spentThisMonth) / monthlyBudget) * 50)),
-  );
+  const healthScore =
+    monthlyBudget > 0
+      ? Math.min(
+          100,
+          Math.max(0, Math.round(50 + ((monthlyBudget - spentThisMonth) / monthlyBudget) * 50)),
+        )
+      : 100;
 
   const totalSaved = savingsGoals.reduce((sum, g) => sum + g.currentAmount, 0);
 

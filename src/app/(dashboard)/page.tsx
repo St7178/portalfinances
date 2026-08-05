@@ -173,15 +173,23 @@ export default async function DashboardPage() {
           <CardTitle className="text-sm font-medium">Presupuesto mensual</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">
-              {formatCurrency(s.spentThisMonth)} de {formatCurrency(s.monthlyBudget)}
-            </span>
-            <span className="font-medium tabular-nums">
-              {s.monthlyBudget > 0 ? Math.round((s.spentThisMonth / s.monthlyBudget) * 100) : 0}%
-            </span>
-          </div>
-          <ProgressBar value={s.spentThisMonth} max={s.monthlyBudget} className="mt-2" />
+          {s.monthlyBudget > 0 ? (
+            <>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {formatCurrency(s.spentThisMonth)} de {formatCurrency(s.monthlyBudget)}
+                </span>
+                <span className="font-medium tabular-nums">
+                  {Math.round((s.spentThisMonth / s.monthlyBudget) * 100)}%
+                </span>
+              </div>
+              <ProgressBar value={s.spentThisMonth} max={s.monthlyBudget} className="mt-2" />
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Registra un ingreso este mes para ver tu presupuesto aquí.
+            </p>
+          )}
         </CardContent>
       </Card>
 

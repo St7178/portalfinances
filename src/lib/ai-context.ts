@@ -29,8 +29,7 @@ export function buildFinancialContext({ expenses, incomes, summary }: SpendingDa
 Resumen financiero del usuario:
 - Dinero disponible: ${formatCurrency(summary.availableBalance)}
 - Gastado este mes: ${formatCurrency(summary.spentThisMonth)}
-- Presupuesto mensual (estimado): ${formatCurrency(summary.monthlyBudget)}
-- Disponible para el mes: ${formatCurrency(summary.availableForMonth)}
+${summary.monthlyBudget > 0 ? `- Presupuesto mensual (ingresos de este mes): ${formatCurrency(summary.monthlyBudget)}\n` : ""}- Disponible para el mes: ${formatCurrency(summary.availableForMonth)}
 - Total ahorrado: ${formatCurrency(summary.totalSaved)}
 - Salud financiera: ${summary.healthScore}/100
 ${summary.nextExpense ? `- Próximo gasto fijo: ${summary.nextExpense.name} (${formatCurrency(summary.nextExpense.amount)})` : ""}

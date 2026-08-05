@@ -10,12 +10,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { bottomNav, mainNav } from "@/config/navigation";
 import { useUIStore } from "@/store/ui.store";
+import type { AlertRule } from "@/types";
 
 interface HeaderProps {
   user: { name: string | null; email: string | null; image: string | null } | null;
+  alerts: AlertRule[];
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, alerts }: HeaderProps) {
   const pathname = usePathname();
   const openQuickAdd = useUIStore((s) => s.openQuickAdd);
   const title = [...mainNav, ...bottomNav].find((item) => item.href === pathname)?.title ?? "";
@@ -45,7 +47,7 @@ export function Header({ user }: HeaderProps) {
         <span className="hidden sm:inline">Agregar</span>
       </Button>
 
-      <AlertsPopover />
+      <AlertsPopover alerts={alerts} />
       <ThemeToggle />
     </header>
   );
