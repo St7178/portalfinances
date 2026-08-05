@@ -1,17 +1,20 @@
 "use client";
 
-import { CalendarClock, Plus, Trash2 } from "lucide-react";
+import { CalendarClock, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { deleteFixedExpense } from "@/features/fixed-expenses/actions/delete-fixed-expense";
 import { toggleFixedExpense } from "@/features/fixed-expenses/actions/toggle-fixed-expense";
+import { toggleFixedExpensePaid } from "@/features/fixed-expenses/actions/toggle-fixed-expense-paid";
 import { FixedExpenseForm } from "@/features/fixed-expenses/components/FixedExpenseForm";
 import { useUndoDelete } from "@/hooks/useUndoDelete";
 import { FORTNIGHT_LABELS } from "@/lib/constants";
+import { currentFortnightPeriodKey } from "@/lib/fortnight";
 import { cn, formatCurrency } from "@/lib/utils";
 import type { FixedExpense } from "@/types";
 
@@ -25,9 +28,26 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
     setItems(initialData);
   }, [initialData]);
 
-  function handleToggle(id: string, active: boolean) {
+  function handleToggleActive(id: string, active: boolean) {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, active } : i)));
     void toggleFixedExpense(id, active);
+  }
+
+  function handleTogglePaid(item: FixedExpense, paid: boolean) {
+    const periodKey = currentFortnightPeriodKey(item.fortnight);
+    setItems((prev) =>
+      prev.map((i) =>
+        i.id === item.id
+          ? {
+              ...i,
+              paidPeriods: paid
+                ? [...i.paidPeriods, periodKey]
+                : i.paidPeriods.filter((p) => p !== periodKey),
+            }
+          : i,
+      ),
+    );
+    void toggleFixedExpensePaid(item.id, periodKey, paid);
   }
 
   function handleDelete(id: string) {
@@ -51,8 +71,8 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
-          {items.length} {items.length === 1 ? "gasto fijo" : "gastos fijos"} · usados para
-          recordatorios por correo
+          {items.length} {items.length === 1 ? "gasto fijo" : "gastos fijos"} · marca lo que ya
+          pagaste esta quincena
         </p>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setOpen(true)}>
           <Plus className="size-3.5" />
@@ -79,36 +99,65 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
                     Nada aquí todavía
                   </p>
                 ) : (
-                  byFortnight[fortnight].map((item, i) => (
-                    <div
-                      key={item.id}
-                      className={cn(
-                        "flex items-center gap-2 px-3 py-2.5",
-                        i > 0 && "border-t border-border",
-                        !item.active && "opacity-50",
-                      )}
-                    >
-                      <Switch
-                        checked={item.active}
-                        onCheckedChange={(checked) => handleToggle(item.id, checked)}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{item.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{item.category}</p>
-                      </div>
-                      <span className="shrink-0 font-mono text-sm tabular-nums">
-                        {formatCurrency(item.amount)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item.id)}
-                        className="shrink-0 text-muted-foreground hover:text-danger"
-                        aria-label={`Eliminar ${item.name}`}
+                  byFortnight[fortnight].map((item, i) => {
+                    const periodKey = currentFortnightPeriodKey(item.fortnight);
+                    const paid = item.paidPeriods.includes(periodKey);
+                    return (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          "flex items-center gap-2.5 px-3 py-2.5",
+                          i > 0 && "border-t border-border",
+                          !item.active && "opacity-50",
+                        )}
                       >
-                        <Trash2 className="size-3.5" />
-                      </button>
-                    </div>
-                  ))
+                        <Checkbox
+                          checked={paid}
+                          onCheckedChange={(checked) => handleTogglePaid(item, checked === true)}
+                          disabled={!item.active}
+                          aria-label={`Marcar ${item.name} como pagado`}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={cn(
+                              "truncate text-sm font-medium",
+                              paid && "text-muted-foreground line-through decoration-success/70",
+                            )}
+                          >
+                            {item.name}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">{item.category}</p>
+                        </div>
+                        <span className="shrink-0 font-mono text-sm tabular-nums">
+                          {formatCurrency(item.amount)}
+                        </span>
+                        {item.paymentUrl && (
+                          <a
+                            href={item.paymentUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
+                            aria-label={`Pagar ${item.name}`}
+                          >
+                            <ExternalLink className="size-3.5" />
+                          </a>
+                        )}
+                        <Switch
+                          checked={item.active}
+                          onCheckedChange={(checked) => handleToggleActive(item.id, checked)}
+                          aria-label={`Activar o desactivar ${item.name}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item.id)}
+                          className="shrink-0 text-muted-foreground hover:text-danger"
+                          aria-label={`Eliminar ${item.name}`}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             </div>
@@ -125,7 +174,10 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
             onSuccess={(values, demo) => {
               setOpen(false);
               if (demo) {
-                setItems((prev) => [...prev, { ...values, id: `demo-${Date.now()}` }]);
+                setItems((prev) => [
+                  ...prev,
+                  { ...values, id: `demo-${Date.now()}`, paidPeriods: [] },
+                ]);
               } else {
                 router.refresh();
               }

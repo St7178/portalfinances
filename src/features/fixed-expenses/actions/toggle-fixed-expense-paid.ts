@@ -1,20 +1,13 @@
 "use server";
 
+import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
-import { fixedExpenseSchema } from "@/features/fixed-expenses/schemas/fixed-expense.schema";
 import { auth } from "@/lib/auth/config";
 import { db } from "@/lib/firebase/admin";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 
-export async function createFixedExpense(data: unknown) {
-  const parsed = fixedExpenseSchema.safeParse(data);
-  if (!parsed.success) {
-    return { success: false as const, error: parsed.error.issues[0]?.message ?? "Datos inválidos" };
-  }
-
-  if (DEMO_MODE) {
-    return { success: true as const, demo: true };
-  }
+export async function toggleFixedExpensePaid(id: string, periodKey: string, paid: boolean) {
+  if (DEMO_MODE) return { success: true as const, demo: true };
 
   const session = await auth();
   if (!session?.user?.id) {
@@ -25,10 +18,9 @@ export async function createFixedExpense(data: unknown) {
     ?.collection("users")
     .doc(session.user.id)
     .collection("fixedExpenses")
-    .add({
-      ...parsed.data,
-      paidPeriods: [],
-      createdAt: new Date(),
+    .doc(id)
+    .update({
+      paidPeriods: paid ? FieldValue.arrayUnion(periodKey) : FieldValue.arrayRemove(periodKey),
       updatedAt: new Date(),
     });
 

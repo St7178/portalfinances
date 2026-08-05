@@ -53,7 +53,12 @@ export async function GET(request: Request) {
     const dueItems: ReminderItem[] = fixedSnapshot.docs
       .map((doc) => doc.data() as FixedExpense)
       .filter((expense) => isDueTomorrow(expense.fortnight))
-      .map((expense) => ({ name: expense.name, amount: expense.amount, dueLabel }));
+      .map((expense) => ({
+        name: expense.name,
+        amount: expense.amount,
+        dueLabel,
+        paymentUrl: expense.paymentUrl,
+      }));
 
     if (dueItems.length === 0) continue;
 

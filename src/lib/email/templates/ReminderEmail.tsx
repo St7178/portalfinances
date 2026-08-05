@@ -1,5 +1,6 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
@@ -15,6 +16,7 @@ export interface ReminderItem {
   name: string;
   amount: number;
   dueLabel: string;
+  paymentUrl?: string;
 }
 
 interface ReminderEmailProps {
@@ -59,6 +61,11 @@ export function ReminderEmail({ userName, items }: ReminderEmailProps) {
                     </tr>
                   </tbody>
                 </table>
+                {item.paymentUrl && (
+                  <Button href={item.paymentUrl} style={styles.payButton}>
+                    Pagar ahora
+                  </Button>
+                )}
               </div>
             ))}
           </Section>
@@ -139,6 +146,15 @@ const styles = {
     color: "#111111",
     margin: 0,
     fontFamily: "'Geist Mono', 'SF Mono', Consolas, monospace",
+  },
+  payButton: {
+    backgroundColor: "#2465e6",
+    borderRadius: "8px",
+    color: "#ffffff",
+    fontSize: "12px",
+    fontWeight: 600,
+    padding: "8px 14px",
+    margin: "0 0 12px",
   },
   total: {
     fontSize: "14px",

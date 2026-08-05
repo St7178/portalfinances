@@ -32,6 +32,9 @@ export interface FixedExpense {
   category: string;
   active: boolean;
   order: number;
+  paymentUrl?: string;
+  /** Period keys (see `currentFortnightPeriodKey`) already marked as paid. */
+  paidPeriods: string[];
 }
 
 export interface RecurringExpense {

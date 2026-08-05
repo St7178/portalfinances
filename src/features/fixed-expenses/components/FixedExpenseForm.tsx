@@ -45,6 +45,7 @@ export function FixedExpenseForm({ onSuccess }: FixedExpenseFormProps) {
       category: "",
       active: true,
       order: 0,
+      paymentUrl: "",
     },
   });
 
@@ -150,6 +151,25 @@ export function FixedExpenseForm({ onSuccess }: FixedExpenseFormProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="paymentUrl"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Link de pago (opcional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="https://..."
+                    {...field}
+                    value={field.value ?? ""}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

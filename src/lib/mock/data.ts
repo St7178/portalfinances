@@ -1,4 +1,5 @@
 import { subDays } from "date-fns";
+import { currentFortnightPeriodKey } from "@/lib/fortnight";
 import type {
   AlertRule,
   CalendarEvent,
@@ -161,6 +162,8 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Transporte",
     active: true,
     order: 0,
+    paymentUrl: "https://www.nequi.com.co",
+    paidPeriods: [currentFortnightPeriodKey("15", today)],
   },
   {
     id: "f2",
@@ -170,6 +173,7 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Transporte",
     active: true,
     order: 1,
+    paidPeriods: [],
   },
   {
     id: "f3",
@@ -179,6 +183,7 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Ahorro",
     active: true,
     order: 2,
+    paidPeriods: [],
   },
   {
     id: "f4",
@@ -188,6 +193,8 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Hogar",
     active: true,
     order: 0,
+    paymentUrl: "https://www.claro.com.co/personas/pagos",
+    paidPeriods: [],
   },
   {
     id: "f5",
@@ -197,6 +204,7 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Tecnología",
     active: true,
     order: 1,
+    paidPeriods: [],
   },
   {
     id: "f6",
@@ -206,6 +214,7 @@ export const mockFixedExpenses: FixedExpense[] = [
     category: "Ahorro",
     active: true,
     order: 2,
+    paidPeriods: [],
   },
 ];
 

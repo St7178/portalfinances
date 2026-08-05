@@ -7,6 +7,10 @@ export const fixedExpenseSchema = z.object({
   category: z.string().min(1),
   active: z.boolean().default(true),
   order: z.number().int().nonnegative().default(0),
+  paymentUrl: z
+    .union([z.url("Debe ser un link http(s) válido"), z.literal("")])
+    .optional()
+    .transform((value) => (value ? value : undefined)),
 });
 
 export type FixedExpenseFormInput = z.input<typeof fixedExpenseSchema>;

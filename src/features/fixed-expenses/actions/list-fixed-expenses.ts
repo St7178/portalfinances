@@ -28,6 +28,8 @@ export async function listFixedExpenses(userId: string): Promise<FixedExpense[]>
       category: data.category,
       active: data.active,
       order: data.order,
+      paymentUrl: data.paymentUrl,
+      paidPeriods: data.paidPeriods ?? [],
     } satisfies FixedExpense;
   });
 }
