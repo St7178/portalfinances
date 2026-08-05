@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, isSameMonth } from "date-fns";
 import { es } from "date-fns/locale";
 import { ArrowDownRight, ArrowUpRight, CalendarClock, PiggyBank, Wallet } from "lucide-react";
 import { CategoryDonut } from "@/components/charts/CategoryDonut";
@@ -9,7 +9,16 @@ import { ProgressBar } from "@/components/shared/ProgressBar";
 import { RecentTransactions } from "@/components/shared/RecentTransactions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertBanner } from "@/features/alerts/components/AlertBanner";
+import { listExpenses } from "@/features/expenses/actions/list-expenses";
+import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-expenses";
+import { listIncomes } from "@/features/income/actions/list-incomes";
+import { listSavingsGoals } from "@/features/savings/actions/list-savings-goals";
 import { SavingsGoalCard } from "@/features/savings/components/SavingsGoalCard";
+import { computeAlerts } from "@/lib/alerts";
+import { computeCategoryBreakdown, computeMonthlyTrend } from "@/lib/analytics";
+import { auth } from "@/lib/auth/config";
+import { computeFinancialSummary } from "@/lib/financial-summary";
+import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import {
   mockAlerts,
   mockCategoryBreakdown,
@@ -21,12 +30,41 @@ import {
 } from "@/lib/mock/data";
 import { formatCurrency } from "@/lib/utils";
 
-export default function DashboardPage() {
-  const s = mockSummary;
+export default async function DashboardPage() {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const useMockData = DEMO_MODE || !userId;
+
+  const [expenses, incomes, savingsGoals, fixedExpenses] = useMockData
+    ? [mockExpenses, mockIncomes, mockSavingsGoals, []]
+    : await Promise.all([
+        listExpenses(userId),
+        listIncomes(userId),
+        listSavingsGoals(userId),
+        listFixedExpenses(userId),
+      ]);
+
+  const s = useMockData
+    ? mockSummary
+    : computeFinancialSummary(expenses, incomes, fixedExpenses, savingsGoals);
+
+  const alerts = useMockData
+    ? mockAlerts
+    : computeAlerts(
+        s,
+        fixedExpenses.filter((f) => f.active),
+        savingsGoals,
+      );
+
+  const categoryBreakdown = useMockData
+    ? mockCategoryBreakdown
+    : computeCategoryBreakdown(expenses.filter((e) => isSameMonth(new Date(e.date), new Date())));
+
+  const monthlyTrend = useMockData ? mockMonthlyTrend : computeMonthlyTrend(expenses, incomes);
 
   return (
     <div className="space-y-6">
-      <AlertBanner alerts={mockAlerts} />
+      <AlertBanner alerts={alerts} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary to-primary/70 p-6 text-primary-foreground shadow-lg shadow-primary/20 lg:col-span-2">
@@ -91,6 +129,11 @@ export default function DashboardPage() {
                   </span>
                 </div>
               )}
+              {!s.nextExpense && !s.nextIncome && (
+                <p className="text-center text-muted-foreground">
+                  Agrega gastos fijos para ver tus próximos pagos aquí.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -133,7 +176,7 @@ export default function DashboardPage() {
               {formatCurrency(s.spentThisMonth)} de {formatCurrency(s.monthlyBudget)}
             </span>
             <span className="font-medium tabular-nums">
-              {Math.round((s.spentThisMonth / s.monthlyBudget) * 100)}%
+              {s.monthlyBudget > 0 ? Math.round((s.spentThisMonth / s.monthlyBudget) * 100) : 0}%
             </span>
           </div>
           <ProgressBar value={s.spentThisMonth} max={s.monthlyBudget} className="mt-2" />
@@ -146,7 +189,13 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">Gastos por categoría</CardTitle>
           </CardHeader>
           <CardContent>
-            <CategoryDonut data={mockCategoryBreakdown} />
+            {categoryBreakdown.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Sin gastos este mes todavía.
+              </p>
+            ) : (
+              <CategoryDonut data={categoryBreakdown} />
+            )}
           </CardContent>
         </Card>
 
@@ -155,7 +204,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">Tendencia mensual</CardTitle>
           </CardHeader>
           <CardContent>
-            <SpendingTrendChart data={mockMonthlyTrend} />
+            <SpendingTrendChart data={monthlyTrend} />
           </CardContent>
         </Card>
       </div>
@@ -166,15 +215,23 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">Últimos movimientos</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentTransactions expenses={mockExpenses} incomes={mockIncomes} />
+            <RecentTransactions expenses={expenses} incomes={incomes} />
           </CardContent>
         </Card>
 
         <div className="space-y-4 lg:col-span-2">
           <h2 className="px-1 text-sm font-medium text-muted-foreground">Objetivos de ahorro</h2>
-          {mockSavingsGoals.map((goal, i) => (
-            <SavingsGoalCard key={goal.id} goal={goal} delay={i * 0.05} />
-          ))}
+          {savingsGoals.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                Aún no tienes metas de ahorro.
+              </CardContent>
+            </Card>
+          ) : (
+            savingsGoals.map((goal, i) => (
+              <SavingsGoalCard key={goal.id} goal={goal} delay={i * 0.05} />
+            ))
+          )}
         </div>
       </div>
     </div>

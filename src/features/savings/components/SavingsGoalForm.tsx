@@ -24,11 +24,11 @@ import {
 
 const EMOJI_OPTIONS = ["🎯", "🏍️", "✈️", "🏠", "🎓", "💻", "🛡️", "🎁"];
 
-export function SavingsGoalForm({
-  onSuccess,
-}: {
-  onSuccess?: (values: SavingsGoalFormValues) => void;
-}) {
+interface SavingsGoalFormProps {
+  onSuccess?: (values: SavingsGoalFormValues, demo: boolean) => void;
+}
+
+export function SavingsGoalForm({ onSuccess }: SavingsGoalFormProps) {
   const [pending, setPending] = useState(false);
   const [emoji, setEmoji] = useState(EMOJI_OPTIONS[0]);
 
@@ -60,7 +60,7 @@ export function SavingsGoalForm({
         : undefined,
     });
     form.reset();
-    onSuccess?.(values);
+    onSuccess?.(values, result.demo);
   }
 
   return (

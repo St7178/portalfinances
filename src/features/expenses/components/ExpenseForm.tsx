@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ import { cn } from "@/lib/utils";
 
 export function ExpenseForm({ onSuccess }: { onSuccess?: () => void }) {
   const [pending, setPending] = useState(false);
+  const router = useRouter();
   const form = useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
@@ -68,6 +70,7 @@ export function ExpenseForm({ onSuccess }: { onSuccess?: () => void }) {
         : undefined,
     });
     form.reset();
+    if (!result.demo) router.refresh();
     onSuccess?.();
   }
 

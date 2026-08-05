@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ import { cn } from "@/lib/utils";
 
 export function IncomeForm({ onSuccess }: { onSuccess?: () => void }) {
   const [pending, setPending] = useState(false);
+  const router = useRouter();
   const form = useForm<IncomeFormInput, unknown, IncomeFormValues>({
     resolver: zodResolver(incomeSchema),
     defaultValues: { name: "", amount: 0, type: "salary", date: new Date(), description: "" },
@@ -58,6 +60,7 @@ export function IncomeForm({ onSuccess }: { onSuccess?: () => void }) {
         : undefined,
     });
     form.reset();
+    if (!result.demo) router.refresh();
     onSuccess?.();
   }
 
