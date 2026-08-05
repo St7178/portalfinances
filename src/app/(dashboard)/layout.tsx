@@ -6,6 +6,7 @@ import { QuickAddModal } from "@/features/expenses/components/QuickAddModal";
 import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-expenses";
 import { listIncomes } from "@/features/income/actions/list-incomes";
 import { listSavingsGoals } from "@/features/savings/actions/list-savings-goals";
+import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { computeAlerts } from "@/lib/alerts";
 import { auth } from "@/lib/auth/config";
 import { computeFinancialSummary } from "@/lib/financial-summary";
@@ -36,13 +37,20 @@ export default async function DashboardLayout({ children }: LayoutProps<"/">) {
   const alerts = useMockData
     ? mockAlerts
     : await (async () => {
-        const [expenses, incomes, fixedExpenses, savingsGoals] = await Promise.all([
+        const [expenses, incomes, fixedExpenses, savingsGoals, profile] = await Promise.all([
           listExpenses(userId),
           listIncomes(userId),
           listFixedExpenses(userId),
           listSavingsGoals(userId),
+          getUserProfile(userId),
         ]);
-        const summary = computeFinancialSummary(expenses, incomes, fixedExpenses, savingsGoals);
+        const summary = computeFinancialSummary(
+          expenses,
+          incomes,
+          fixedExpenses,
+          savingsGoals,
+          profile.monthlySalary,
+        );
         return computeAlerts(
           summary,
           fixedExpenses.filter((f) => f.active),

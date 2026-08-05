@@ -6,20 +6,24 @@ import { SpendingTrendChart } from "@/components/charts/SpendingTrendChart";
 import { WeekdaySpendChart } from "@/components/charts/WeekdaySpendChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listExpenses } from "@/features/expenses/actions/list-expenses";
+import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-expenses";
 import { listIncomes } from "@/features/income/actions/list-incomes";
+import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { computeCategoryBreakdown, computeMonthlyTrend } from "@/lib/analytics";
 import { auth } from "@/lib/auth/config";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
 import {
   mockCategoryBreakdown,
   mockExpenses,
+  mockFixedExpenses,
   mockIncomes,
   mockMonthlyTrend,
 } from "@/lib/mock/data";
-import { formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const WEEKDAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Monday-first
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const HISTORY_MONTHS = 12;
 
 export const dynamic = "force-dynamic";
 
@@ -28,9 +32,14 @@ export default async function AnalyticsPage() {
   const userId = session?.user?.id;
   const useMockData = DEMO_MODE || !userId;
 
-  const [allExpenses, allIncomes] = useMockData
-    ? [mockExpenses, mockIncomes]
-    : await Promise.all([listExpenses(userId), listIncomes(userId)]);
+  const [allExpenses, allIncomes, fixedExpenses, profile] = useMockData
+    ? [mockExpenses, mockIncomes, mockFixedExpenses, { notifyEmail: true, monthlySalary: 0 }]
+    : await Promise.all([
+        listExpenses(userId),
+        listIncomes(userId),
+        listFixedExpenses(userId),
+        getUserProfile(userId),
+      ]);
 
   const today = new Date();
   const expenses = useMockData
@@ -42,7 +51,13 @@ export default async function AnalyticsPage() {
     : computeCategoryBreakdown(expenses);
   const monthlyTrend = useMockData
     ? mockMonthlyTrend
-    : computeMonthlyTrend(allExpenses, allIncomes);
+    : computeMonthlyTrend(
+        allExpenses,
+        allIncomes,
+        fixedExpenses,
+        profile.monthlySalary,
+        HISTORY_MONTHS,
+      );
 
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
   const dayOfMonth = today.getDate();
@@ -116,6 +131,45 @@ export default async function AnalyticsPage() {
         </CardHeader>
         <CardContent>
           <SpendingTrendChart data={monthlyTrend} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Historial mensual</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto p-0">
+          <table className="w-full min-w-[420px] text-sm">
+            <thead>
+              <tr className="border-b border-border text-xs text-muted-foreground">
+                <th className="px-4 py-2 text-left font-medium">Mes</th>
+                <th className="px-4 py-2 text-right font-medium">Ingresos</th>
+                <th className="px-4 py-2 text-right font-medium">Gastos</th>
+                <th className="px-4 py-2 text-right font-medium">Ahorro neto</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {monthlyTrend.map((entry) => (
+                <tr key={entry.month}>
+                  <td className="px-4 py-2.5 font-medium capitalize">{entry.month}</td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums text-success">
+                    {formatCurrency(entry.ingresos)}
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono tabular-nums text-danger">
+                    {formatCurrency(entry.gastos)}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-4 py-2.5 text-right font-mono font-medium tabular-nums",
+                      entry.ahorroNeto >= 0 ? "text-foreground" : "text-danger",
+                    )}
+                  >
+                    {formatCurrency(entry.ahorroNeto)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </CardContent>
       </Card>
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, LogOut, Moon, Sun, SunMoon, X } from "lucide-react";
+import { Bell, Check, LogOut, Moon, Pencil, Sun, SunMoon, Wallet, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,8 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { toggleEmailNotifications } from "@/features/settings/actions/toggle-email-notifications";
+import { updateMonthlySalary } from "@/features/settings/actions/update-monthly-salary";
 import { CURRENCY, EXPENSE_CATEGORIES, LOCALE } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 
 const THEME_OPTIONS = [
   { value: "light", label: "Claro", icon: Sun },
@@ -19,12 +21,28 @@ const THEME_OPTIONS = [
   { value: "system", label: "Sistema", icon: SunMoon },
 ];
 
-export function SettingsClientSections({ initialNotifyEmail }: { initialNotifyEmail: boolean }) {
+interface SettingsClientSectionsProps {
+  initialNotifyEmail: boolean;
+  initialMonthlySalary: number;
+  suggestedSalary: number;
+}
+
+export function SettingsClientSections({
+  initialNotifyEmail,
+  initialMonthlySalary,
+  suggestedSalary,
+}: SettingsClientSectionsProps) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState<string[]>([...EXPENSE_CATEGORIES]);
   const [newCategory, setNewCategory] = useState("");
   const [notifyEmail, setNotifyEmail] = useState(initialNotifyEmail);
+  const [monthlySalary, setMonthlySalary] = useState(initialMonthlySalary);
+  const [editingSalary, setEditingSalary] = useState(false);
+  const [salaryInput, setSalaryInput] = useState(
+    String(initialMonthlySalary || suggestedSalary || ""),
+  );
+  const [savingSalary, setSavingSalary] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -38,6 +56,28 @@ export function SettingsClientSections({ initialNotifyEmail }: { initialNotifyEm
   function handleNotifyToggle(checked: boolean) {
     setNotifyEmail(checked);
     void toggleEmailNotifications(checked);
+  }
+
+  async function handleSaveSalary() {
+    const amount = Number(salaryInput);
+    if (!Number.isFinite(amount) || amount < 0) {
+      toast.error("Ingresa un valor válido");
+      return;
+    }
+    setSavingSalary(true);
+    const result = await updateMonthlySalary(amount);
+    setSavingSalary(false);
+    if (!result.success) {
+      toast.error(result.error);
+      return;
+    }
+    setMonthlySalary(amount);
+    setEditingSalary(false);
+    toast.success("Salario actualizado", {
+      description: result.demo
+        ? "Modo demo: conecta Firebase para guardar datos reales."
+        : undefined,
+    });
   }
 
   return (
@@ -66,6 +106,70 @@ export function SettingsClientSections({ initialNotifyEmail }: { initialNotifyEm
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Salario mensual</CardTitle>
+          <CardDescription>
+            Un valor fijo que se asume cada mes hasta que lo actualices — no necesitas registrar un
+            ingreso nuevo cada vez que te paguen.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {editingSalary ? (
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                inputMode="decimal"
+                autoFocus
+                value={salaryInput}
+                onChange={(e) => setSalaryInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSaveSalary()}
+                placeholder="0"
+                className="max-w-48"
+              />
+              <Button size="icon" onClick={handleSaveSalary} disabled={savingSalary}>
+                <Check className="size-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => {
+                  setEditingSalary(false);
+                  setSalaryInput(String(monthlySalary || suggestedSalary || ""));
+                }}
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between rounded-lg border border-border px-4 py-3">
+              <div className="flex items-center gap-2.5">
+                <Wallet className="size-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium tabular-nums">
+                    {monthlySalary > 0 ? formatCurrency(monthlySalary) : "Sin configurar"}
+                  </p>
+                  {monthlySalary === 0 && suggestedSalary > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Sugerencia según tu último ingreso: {formatCurrency(suggestedSalary)}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setEditingSalary(true)}
+              >
+                <Pencil className="size-3.5" />
+                Editar
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

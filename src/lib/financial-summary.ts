@@ -40,6 +40,7 @@ export function computeFinancialSummary(
   incomes: Income[],
   fixedExpenses: FixedExpense[],
   savingsGoals: SavingsGoal[],
+  monthlySalary = 0,
   referenceDate = new Date(),
 ): FinancialSummary {
   const activeFixed = fixedExpenses.filter((f) => f.active);
@@ -61,21 +62,15 @@ export function computeFinancialSummary(
     .filter((e) => isSameWeek(new Date(e.date), referenceDate, { weekStartsOn: 1 }))
     .reduce((sum, e) => sum + e.amount, 0);
 
-  const currentSalary =
-    incomes.find((i) => i.type === "salary" && isSameMonth(new Date(i.date), referenceDate))
-      ?.amount ??
-    incomes.find((i) => i.type === "salary")?.amount ??
-    0;
-
-  // Salary is treated as a standing, recurring figure — like a Fixed
-  // Expense — not a transaction you have to re-log every month. If no
-  // salary was logged this specific month, carry the last known salary
-  // forward on top of whatever one-off income (freelance, bonus, etc.) was
-  // actually logged this month. If a fresh salary WAS logged this month,
-  // that real total is used as-is (no double counting).
+  // Salary is a standing, recurring figure set once in Settings — like a
+  // Fixed Expense — not a transaction re-logged every month. If a salary
+  // transaction WAS logged this specific month (a raise takes effect, a
+  // one-time correction, etc.), that real total wins over the assumption;
+  // otherwise the configured salary carries forward on top of whatever
+  // one-off income (freelance, bonus, etc.) was actually logged this month.
   const effectiveIncomeThisMonth = salaryLoggedThisMonth
     ? totalIncomeThisMonth
-    : totalIncomeThisMonth + currentSalary;
+    : totalIncomeThisMonth + monthlySalary;
 
   // "Dinero disponible" (the hero figure) is a running balance — all income
   // you've ever logged minus all variable expenses you've ever logged minus
@@ -109,9 +104,13 @@ export function computeFinancialSummary(
 
   const totalSaved = savingsGoals.reduce((sum, g) => sum + g.currentAmount, 0);
 
+  const salaryPortionThisMonth = salaryLoggedThisMonth
+    ? incomeThisMonth.filter((i) => i.type === "salary").reduce((sum, i) => sum + i.amount, 0)
+    : monthlySalary;
+
   return {
     availableBalance,
-    monthlySalary: currentSalary,
+    monthlySalary: salaryPortionThisMonth,
     spentToday,
     spentThisWeek,
     spentThisMonth,

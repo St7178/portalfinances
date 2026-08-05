@@ -8,6 +8,7 @@ import { listExpenses } from "@/features/expenses/actions/list-expenses";
 import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-expenses";
 import { listIncomes } from "@/features/income/actions/list-incomes";
 import { listSavingsGoals } from "@/features/savings/actions/list-savings-goals";
+import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { auth } from "@/lib/auth/config";
 import { computeFinancialSummary } from "@/lib/financial-summary";
 import { DEMO_MODE } from "@/lib/firebase/demo-mode";
@@ -22,18 +23,25 @@ export default async function AiPage() {
   const userId = session?.user?.id;
   const useMockData = DEMO_MODE || !userId;
 
-  const [expenses, incomes, fixedExpenses, savingsGoals] = useMockData
-    ? [mockExpenses, mockIncomes, [], mockSavingsGoals]
+  const [expenses, incomes, fixedExpenses, savingsGoals, profile] = useMockData
+    ? [mockExpenses, mockIncomes, [], mockSavingsGoals, { notifyEmail: true, monthlySalary: 0 }]
     : await Promise.all([
         listExpenses(userId),
         listIncomes(userId),
         listFixedExpenses(userId),
         listSavingsGoals(userId),
+        getUserProfile(userId),
       ]);
 
   const summary = useMockData
     ? mockSummary
-    : computeFinancialSummary(expenses, incomes, fixedExpenses, savingsGoals);
+    : computeFinancialSummary(
+        expenses,
+        incomes,
+        fixedExpenses,
+        savingsGoals,
+        profile.monthlySalary,
+      );
 
   const predictions = computePredictions(summary, savingsGoals);
   const insights = computeInsights(expenses);

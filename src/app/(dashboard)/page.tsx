@@ -14,6 +14,7 @@ import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-
 import { listIncomes } from "@/features/income/actions/list-incomes";
 import { listSavingsGoals } from "@/features/savings/actions/list-savings-goals";
 import { SavingsGoalCard } from "@/features/savings/components/SavingsGoalCard";
+import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { computeAlerts } from "@/lib/alerts";
 import { computeCategoryBreakdown, computeMonthlyTrend } from "@/lib/analytics";
 import { auth } from "@/lib/auth/config";
@@ -37,18 +38,25 @@ export default async function DashboardPage() {
   const userId = session?.user?.id;
   const useMockData = DEMO_MODE || !userId;
 
-  const [expenses, incomes, savingsGoals, fixedExpenses] = useMockData
-    ? [mockExpenses, mockIncomes, mockSavingsGoals, []]
+  const [expenses, incomes, savingsGoals, fixedExpenses, profile] = useMockData
+    ? [mockExpenses, mockIncomes, mockSavingsGoals, [], { notifyEmail: true, monthlySalary: 0 }]
     : await Promise.all([
         listExpenses(userId),
         listIncomes(userId),
         listSavingsGoals(userId),
         listFixedExpenses(userId),
+        getUserProfile(userId),
       ]);
 
   const s = useMockData
     ? mockSummary
-    : computeFinancialSummary(expenses, incomes, fixedExpenses, savingsGoals);
+    : computeFinancialSummary(
+        expenses,
+        incomes,
+        fixedExpenses,
+        savingsGoals,
+        profile.monthlySalary,
+      );
 
   const alerts = useMockData
     ? mockAlerts
@@ -62,7 +70,9 @@ export default async function DashboardPage() {
     ? mockCategoryBreakdown
     : computeCategoryBreakdown(expenses.filter((e) => isSameMonth(new Date(e.date), new Date())));
 
-  const monthlyTrend = useMockData ? mockMonthlyTrend : computeMonthlyTrend(expenses, incomes);
+  const monthlyTrend = useMockData
+    ? mockMonthlyTrend
+    : computeMonthlyTrend(expenses, incomes, fixedExpenses, profile.monthlySalary);
 
   return (
     <div className="space-y-4 sm:space-y-6">

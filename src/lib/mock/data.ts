@@ -368,10 +368,15 @@ export const mockCategoryBreakdown = Object.entries(
 ).map(([category, amount]) => ({ category, amount }));
 
 export const mockMonthlyTrend = [
-  { month: "Mar", gastos: 3_200_000, ingresos: 4_200_000 },
-  { month: "Abr", gastos: 3_500_000, ingresos: 4_200_000 },
-  { month: "May", gastos: 3_000_000, ingresos: 4_700_000 },
-  { month: "Jun", gastos: 3_700_000, ingresos: 4_200_000 },
-  { month: "Jul", gastos: 3_300_000, ingresos: 4_900_000 },
-  { month: "Ago", gastos: spentThisMonth, ingresos: totalIncome },
+  { month: "Mar", gastos: 3_200_000, ingresos: 4_200_000, ahorroNeto: 1_000_000 },
+  { month: "Abr", gastos: 3_500_000, ingresos: 4_200_000, ahorroNeto: 700_000 },
+  { month: "May", gastos: 3_000_000, ingresos: 4_700_000, ahorroNeto: 1_700_000 },
+  { month: "Jun", gastos: 3_700_000, ingresos: 4_200_000, ahorroNeto: 500_000 },
+  { month: "Jul", gastos: 3_300_000, ingresos: 4_900_000, ahorroNeto: 1_600_000 },
+  {
+    month: "Ago",
+    gastos: spentThisMonth,
+    ingresos: totalIncome,
+    ahorroNeto: totalIncome - spentThisMonth,
+  },
 ];

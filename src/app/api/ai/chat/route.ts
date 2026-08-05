@@ -5,6 +5,7 @@ import { listExpenses } from "@/features/expenses/actions/list-expenses";
 import { listFixedExpenses } from "@/features/fixed-expenses/actions/list-fixed-expenses";
 import { listIncomes } from "@/features/income/actions/list-incomes";
 import { listSavingsGoals } from "@/features/savings/actions/list-savings-goals";
+import { getUserProfile } from "@/features/settings/actions/get-user-profile";
 import { buildFinancialContext } from "@/lib/ai-context";
 import { auth } from "@/lib/auth/config";
 import { computeFinancialSummary } from "@/lib/financial-summary";
@@ -27,13 +28,20 @@ export async function POST(request: Request) {
     ? buildFinancialContext({ expenses: mockExpenses, incomes: mockIncomes, summary: mockSummary })
     : buildFinancialContext(
         await (async () => {
-          const [expenses, incomes, fixedExpenses, savingsGoals] = await Promise.all([
+          const [expenses, incomes, fixedExpenses, savingsGoals, profile] = await Promise.all([
             listExpenses(userId),
             listIncomes(userId),
             listFixedExpenses(userId),
             listSavingsGoals(userId),
+            getUserProfile(userId),
           ]);
-          const summary = computeFinancialSummary(expenses, incomes, fixedExpenses, savingsGoals);
+          const summary = computeFinancialSummary(
+            expenses,
+            incomes,
+            fixedExpenses,
+            savingsGoals,
+            profile.monthlySalary,
+          );
           return { expenses, incomes, summary };
         })(),
       );
