@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, Wallet2 } from "lucide-react";
+import { Menu } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -29,9 +30,13 @@ export function MobileNav() {
       </DrawerTrigger>
       <DrawerContent className="h-full w-72 data-[vaul-drawer-direction=left]:rounded-r-2xl">
         <DrawerHeader className="flex flex-row items-center gap-2 border-b border-border px-4 py-4">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Wallet2 className="size-4" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt={siteConfig.name}
+            width={32}
+            height={32}
+            className="size-8 rounded-lg"
+          />
           <DrawerTitle className="text-sm font-semibold">{siteConfig.name}</DrawerTitle>
         </DrawerHeader>
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">

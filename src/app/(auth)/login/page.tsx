@@ -1,4 +1,5 @@
-import { Sparkles, Wallet2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { LoginBackdrop } from "@/components/auth/LoginBackdrop";
 import { Button } from "@/components/ui/button";
@@ -14,14 +15,17 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-            <Wallet2 className="size-5" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt={siteConfig.name}
+            width={56}
+            height={56}
+            className="size-14 rounded-2xl shadow-lg shadow-primary/25"
+            priority
+          />
           <div className="space-y-1">
             <h1 className="text-xl font-semibold tracking-tight">{siteConfig.name}</h1>
-            <p className="text-sm text-muted-foreground">
-              Tus finanzas, con la elegancia que merecen.
-            </p>
+            <p className="text-sm text-muted-foreground">{siteConfig.tagline}</p>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { siteConfig } from "@/config/site";
 import { formatCurrency } from "@/lib/utils";
 
 export interface ReminderItem {
@@ -37,12 +38,13 @@ export function ReminderEmail({ userName, items }: ReminderEmailProps) {
       <Preview>{preview}</Preview>
       <Body style={styles.body}>
         <Container style={styles.container}>
-          <Text style={styles.brand}>Finanzas</Text>
+          <Text style={styles.brand}>{siteConfig.name}</Text>
           <Heading style={styles.heading}>
             Hola {userName.split(" ")[0]}, tienes pagos próximos
           </Heading>
           <Text style={styles.paragraph}>
-            Estos son los gastos fijos que vencen pronto según tu configuración en Finanzas:
+            Estos son los gastos fijos que vencen pronto según tu configuración en {siteConfig.name}
+            :
           </Text>
 
           <Section style={styles.itemsBox}>
@@ -74,7 +76,7 @@ export function ReminderEmail({ userName, items }: ReminderEmailProps) {
 
           <Hr style={styles.hr} />
           <Text style={styles.footer}>
-            Recibiste este correo porque tienes recordatorios activados en Finanzas. Puedes
+            Recibiste este correo porque tienes recordatorios activados en {siteConfig.name}. Puedes
             desactivarlos desde Configuración.
           </Text>
         </Container>

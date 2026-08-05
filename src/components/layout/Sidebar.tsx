@@ -1,7 +1,8 @@
 "use client";
 
-import { LogOut, PanelLeftClose, PanelLeftOpen, Settings, Wallet2 } from "lucide-react";
+import { LogOut, PanelLeftClose, PanelLeftOpen, Settings } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,9 +43,13 @@ export function Sidebar({ user }: SidebarProps) {
       className="sticky top-0 z-30 hidden h-dvh shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
     >
       <div className={cn("flex h-16 items-center gap-2 px-4", collapsed && "justify-center px-0")}>
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-          <Wallet2 className="size-4" />
-        </div>
+        <Image
+          src="/logo.png"
+          alt={siteConfig.name}
+          width={32}
+          height={32}
+          className="size-8 shrink-0 rounded-lg"
+        />
         {!collapsed && (
           <span className="truncate text-sm font-semibold tracking-tight">{siteConfig.name}</span>
         )}

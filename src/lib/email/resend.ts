@@ -1,9 +1,11 @@
 import { Resend } from "resend";
+import { siteConfig } from "@/config/site";
 
 const apiKey = process.env.RESEND_API_KEY;
 
 export const isEmailConfigured = Boolean(apiKey);
-export const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "Finanzas <onboarding@resend.dev>";
+export const FROM_EMAIL =
+  process.env.RESEND_FROM_EMAIL ?? `${siteConfig.name} <onboarding@resend.dev>`;
 
 /**
  * `resend` is only safe to use when `isEmailConfigured` is true. Callers
