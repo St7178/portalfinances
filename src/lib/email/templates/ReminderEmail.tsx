@@ -100,7 +100,7 @@ const styles = {
   brand: {
     fontSize: "13px",
     fontWeight: 600,
-    color: "#2465e6",
+    color: "#3b8040",
     letterSpacing: "0.02em",
     margin: "0 0 16px",
   },
@@ -148,7 +148,7 @@ const styles = {
     fontFamily: "'Geist Mono', 'SF Mono', Consolas, monospace",
   },
   payButton: {
-    backgroundColor: "#2465e6",
+    backgroundColor: "#3b8040",
     borderRadius: "8px",
     color: "#ffffff",
     fontSize: "12px",
