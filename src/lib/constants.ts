@@ -6,7 +6,7 @@ export const AUTHORIZED_EMAILS = (process.env.AUTHORIZED_EMAILS ?? "")
   .filter(Boolean);
 
 export const LOCALE = process.env.NEXT_PUBLIC_LOCALE ?? "es-CO";
-export const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY ?? "USD";
+export const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY ?? "COP";
 
 export const EXPENSE_CATEGORIES = [
   "Alimentación",

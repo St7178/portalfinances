@@ -18,7 +18,7 @@ export const useUserStore = create<UserState>((set) => ({
   name: null,
   email: null,
   image: null,
-  preferences: { currency: "USD", locale: "es-CO" },
+  preferences: { currency: "COP", locale: "es-CO" },
   setUser: (user) => set(user),
   clearUser: () => set({ name: null, email: null, image: null }),
 }));

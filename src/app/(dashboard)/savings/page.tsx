@@ -11,7 +11,7 @@ import { SavingsGoalForm } from "@/features/savings/components/SavingsGoalForm";
 import { mockSavingsGoals } from "@/lib/mock/data";
 import type { SavingsGoal } from "@/types";
 
-const CONTRIBUTION_STEP = 150;
+const CONTRIBUTION_STEP = 500_000;
 
 export default function SavingsPage() {
   const [goals, setGoals] = useState<SavingsGoal[]>(mockSavingsGoals);
