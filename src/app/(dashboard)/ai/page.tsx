@@ -1,8 +1,9 @@
 import { BarChart3, MessageCircle, Sparkles, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { AiAdvisorPanel } from "@/features/ai/components/AiAdvisorPanel";
 
-const PREVIEW_FEATURES = [
+const UPCOMING_FEATURES = [
   {
     icon: MessageCircle,
     title: "Chat financiero",
@@ -28,26 +29,32 @@ export default function AiPage() {
         <Sparkles className="size-6" />
       </span>
       <h2 className="mt-5 text-xl font-semibold tracking-tight">Asesor financiero IA</h2>
-      <Badge variant="secondary" className="mt-2">
-        Próximamente
-      </Badge>
+      <p className="mt-2 text-xs text-muted-foreground">Impulsado por OpenAI · gpt-4o-mini</p>
       <p className="mt-3 max-w-md text-sm text-muted-foreground">
-        La arquitectura ya está lista — se activa configurando una API key gratuita de Gemini en las
-        variables de entorno. Ver <code className="text-foreground">SETUP.md</code>.
+        Analiza tus movimientos recientes y te da consejos concretos y accionables.
       </p>
 
-      <div className="mt-10 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
-        {PREVIEW_FEATURES.map((feature) => (
-          <Card key={feature.title} className="text-left">
-            <CardContent className="space-y-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                <feature.icon className="size-4" />
-              </span>
-              <p className="text-sm font-medium">{feature.title}</p>
-              <p className="text-xs text-muted-foreground">{feature.description}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="mt-8">
+        <AiAdvisorPanel />
+      </div>
+
+      <div className="mt-16 w-full max-w-3xl">
+        <div className="mb-4 flex items-center justify-center gap-2">
+          <Badge variant="secondary">Próximamente</Badge>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {UPCOMING_FEATURES.map((feature) => (
+            <Card key={feature.title} className="text-left">
+              <CardContent className="space-y-2">
+                <span className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                  <feature.icon className="size-4" />
+                </span>
+                <p className="text-sm font-medium">{feature.title}</p>
+                <p className="text-xs text-muted-foreground">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

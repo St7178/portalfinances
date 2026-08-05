@@ -76,20 +76,21 @@ toasts, nothing is persisted.
 
 ---
 
-## 4. AI — Gemini free tier (optional)
+## 4. AI — OpenAI (optional)
 
 The AI advisor screen (`/ai`) is wired but inactive until you add a key.
-Google's Gemini 2.0 Flash has a genuinely free tier (no card required),
-which is why it's the default provider instead of OpenAI/Anthropic.
+Currently configured for OpenAI's `gpt-4o-mini`.
 
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) → Create API
-   key.
-2. `GOOGLE_GENERATIVE_AI_API_KEY=...` in `.env.local`.
+1. [platform.openai.com/api-keys](https://platform.openai.com/api-keys) →
+   Create new secret key. Requires billing set up on the account — OpenAI
+   has no free tier.
+2. `OPENAI_API_KEY=...` in `.env.local`.
 
 To switch providers later, only `src/features/ai/actions/financial-advice.ts`
-and `src/app/api/ai/analyze/route.ts` change — swap `@ai-sdk/google` for
-`@ai-sdk/openai` or `@ai-sdk/anthropic`; the UI never touches the provider
-directly.
+and `src/app/api/ai/analyze/route.ts` change — swap `@ai-sdk/openai` for
+`@ai-sdk/google` (Gemini has a free tier, if cost matters more than using
+OpenAI specifically) or `@ai-sdk/anthropic`; the UI never touches the
+provider directly.
 
 ---
 
@@ -138,5 +139,7 @@ tiers and matching what's actually installed today (August 2026):
   small-allowlist app (a handful of authorized emails), not a full
   multi-tenant user table, so a database session adapter would be pure
   overhead.
-- **Gemini as the default AI provider** — genuinely free tier, unlike
-  OpenAI/Anthropic. Swapping providers is a one-line change (see §4).
+- **OpenAI as the AI provider** — the only piece of this stack that isn't
+  free tier (Gemini's free tier hit a `0`-quota project restriction that a
+  quick retry didn't clear; OpenAI was already funded and worked
+  immediately). Swapping providers is a one-line change (see §4).
