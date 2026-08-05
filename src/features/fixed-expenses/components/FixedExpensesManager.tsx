@@ -72,7 +72,7 @@ export function FixedExpensesManager({ initialData }: { initialData: FixedExpens
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">
           {items.length} {items.length === 1 ? "gasto fijo" : "gastos fijos"} · marca lo que ya
-          pagaste esta quincena
+          pagaste — se desmarca solo al empezar la siguiente quincena
         </p>
         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setOpen(true)}>
           <Plus className="size-3.5" />
