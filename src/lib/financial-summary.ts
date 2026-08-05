@@ -51,6 +51,7 @@ export function computeFinancialSummary(
 
   const incomeThisMonth = incomes.filter((i) => isSameMonth(new Date(i.date), referenceDate));
   const totalIncomeThisMonth = incomeThisMonth.reduce((sum, i) => sum + i.amount, 0);
+  const salaryLoggedThisMonth = incomeThisMonth.some((i) => i.type === "salary");
 
   const spentToday = expenses
     .filter((e) => isSameDay(new Date(e.date), referenceDate))
@@ -66,6 +67,16 @@ export function computeFinancialSummary(
     incomes.find((i) => i.type === "salary")?.amount ??
     0;
 
+  // Salary is treated as a standing, recurring figure — like a Fixed
+  // Expense — not a transaction you have to re-log every month. If no
+  // salary was logged this specific month, carry the last known salary
+  // forward on top of whatever one-off income (freelance, bonus, etc.) was
+  // actually logged this month. If a fresh salary WAS logged this month,
+  // that real total is used as-is (no double counting).
+  const effectiveIncomeThisMonth = salaryLoggedThisMonth
+    ? totalIncomeThisMonth
+    : totalIncomeThisMonth + currentSalary;
+
   // "Dinero disponible" (the hero figure) is a running balance — all income
   // you've ever logged minus all variable expenses you've ever logged minus
   // your current fixed obligations for this period. Deliberately NOT scoped
@@ -80,13 +91,13 @@ export function computeFinancialSummary(
   // going negative there is a meaningful, intentional signal ("you're on
   // track to spend more than you've earned this month"), unlike the hero
   // figure above.
-  const availableForMonth = totalIncomeThisMonth - spentThisMonth;
+  const availableForMonth = effectiveIncomeThisMonth - spentThisMonth;
   // No explicit budget-setting feature yet, and no invented default either —
   // this app previously showed a hardcoded 3,000,000 COP "budget" the user
   // never set, which read as fabricated data. Zero here means "not enough
   // information yet" and every consumer (alerts, predictions, this card)
   // already guards on `monthlyBudget > 0` before using it.
-  const monthlyBudget = totalIncomeThisMonth;
+  const monthlyBudget = effectiveIncomeThisMonth;
 
   const healthScore =
     monthlyBudget > 0
